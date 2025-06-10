@@ -1,162 +1,215 @@
+
 const express = require('express');
 const multer = require('multer');
-const fetch = require('node-fetch'); // node-fetch v2
+const fetch = require('node-fetch');
 const FormData = require('form-data');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Multer in-memory storage
-const upload = multer({ storage: multer.memoryStorage() });
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'), false);
+    }
+  }
+});
 
-// API keys (should be in environment variables in production)
-const REMOVE_BG_API_KEY = process.env.REMOVE_BG_API_KEY || "YOUR_REMOVE_BG_API_KEY";
-const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY || "YOUR_REPLICATE_API_KEY";
+// API keys from environment variables
+const REMOVE_BG_API_KEY = process.env.REMOVE_BG_API_KEY;
+const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Ensure uploads folder exists
-if (!fs.existsSync('uploads')) {
-  fs.mkdirSync('uploads');
-}
-
-// Check for API keys
-if (
-  !REMOVE_BG_API_KEY ||
-  REMOVE_BG_API_KEY === "YOUR_REMOVE_BG_API_KEY" ||
-  !REPLICATE_API_KEY ||
-  REPLICATE_API_KEY === "YOUR_REPLICATE_API_KEY"
-) {
-  console.error('ERROR: API keys are missing or not set.');
+// Validate API keys on startup
+if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
+  console.error('ERROR: API keys are missing in environment variables');
   process.exit(1);
 }
 
-// Process endpoint
+// Middleware
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGIN || '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Utility function to clean up temporary files
+const cleanupFile = (filePath) => {
+  if (filePath && fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error('Error cleaning up file:', err);
+    }
+  }
+};
+
+// Process image endpoint
 app.post('/process', upload.single('image'), async (req, res) => {
+  let removedBgPath = null;
+  
   try {
+    // Validate input
     if (!req.file) {
-      return res.status(400).json({ error: 'No image uploaded' });
+      return res.status(400).json({ error: 'No image file uploaded' });
     }
 
-    // 1) Remove background
-    const formData = new FormData();
-    formData.append('image_file', req.file.buffer, {
+    // Step 1: Remove background with remove.bg
+    const removeBgForm = new FormData();
+    removeBgForm.append('image_file', req.file.buffer, {
       filename: req.file.originalname,
       contentType: req.file.mimetype
     });
-    formData.append('size', 'auto');
+    removeBgForm.append('size', 'auto');
 
-    const removeRes = await fetch('https://api.remove.bg/v1.0/removebg', {
+    const removeBgResponse = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
         'X-Api-Key': REMOVE_BG_API_KEY,
-        ...formData.getHeaders()
+        ...removeBgForm.getHeaders()
       },
-      body: formData
+      body: removeBgForm
     });
 
-    if (!removeRes.ok) {
-      const error = await removeRes.text();
-      return res.status(400).json({ error: 'Remove.bg failed', details: error });
+    if (!removeBgResponse.ok) {
+      const error = await removeBgResponse.json();
+      throw new Error(`Background removal failed: ${error.errors?.join(', ') || 'Unknown error'}`);
     }
 
-    const buffer = await removeRes.buffer();
-    const filename = `removed_${Date.now()}.png`;
-    const removedBgPath = path.join('uploads', filename);
-    fs.writeFileSync(removedBgPath, buffer);
+    // Save the background-removed image temporarily
+    const bgRemovedBuffer = await removeBgResponse.buffer();
+    const bgRemovedFilename = `removed_${Date.now()}.png`;
+    removedBgPath = path.join(uploadsDir, bgRemovedFilename);
+    fs.writeFileSync(removedBgPath, bgRemovedBuffer);
 
-    // 2) Enhance with Replicate
-    const replicateRes = await fetch('https://api.replicate.com/v1/predictions', {
+    // Step 2: Enhance image with Replicate
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${bgRemovedFilename}`;
+    
+    const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${REPLICATE_API_KEY}`,
+        'Authorization': `Token ${REPLICATE_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         version: "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b",
         input: {
-          image: `data:image/png;base64,${buffer.toString('base64')}`,
+          image: imageUrl,
           scale: 2,
           face_enhance: false
         }
       })
     });
 
-    if (!replicateRes.ok) {
-      const error = await replicateRes.json();
-      return res.status(400).json({ error: 'Replicate API failed', details: error });
+    if (!replicateResponse.ok) {
+      const error = await replicateResponse.json();
+      throw new Error(`Replicate API error: ${error.detail || 'Unknown error'}`);
     }
 
-    const replicateJson = await replicateRes.json();
-
-    if (!replicateJson.urls || !replicateJson.urls.get) {
-      return res.status(400).json({ error: 'Replicate API response missing URLs' });
+    const prediction = await replicateResponse.json();
+    
+    if (!prediction?.urls?.get) {
+      throw new Error('Invalid response from Replicate API');
     }
 
-    // 3) Poll for completion
-    let outputUrl;
+    // Step 3: Poll for enhancement completion
+    let enhancedImageUrl = null;
     let attempts = 0;
-    const maxAttempts = 30; // ~60 seconds
+    const maxAttempts = 30; // ~60 seconds timeout
 
-    while (attempts < maxAttempts) {
-      const finalRes = await fetch(replicateJson.urls.get, {
+    while (attempts < maxAttempts && !enhancedImageUrl) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const statusResponse = await fetch(prediction.urls.get, {
         headers: {
-          'Authorization': `Bearer ${REPLICATE_API_KEY}`
+          'Authorization': `Token ${REPLICATE_API_KEY}`
         }
       });
 
-      const finalJson = await finalRes.json();
-
-      if (finalJson.status === 'succeeded') {
-        outputUrl = finalJson.output;
+      const statusData = await statusResponse.json();
+      
+      if (statusData.status === 'succeeded') {
+        enhancedImageUrl = statusData.output;
         break;
-      } else if (finalJson.status === 'failed') {
-        return res.status(400).json({ error: 'Image enhancement failed', details: finalJson });
+      } else if (statusData.status === 'failed') {
+        throw new Error('Image enhancement failed');
       }
-
+      
       attempts++;
-      await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
-    if (!outputUrl) {
-      return res.status(408).json({ error: 'Image enhancement timed out' });
+    if (!enhancedImageUrl) {
+      throw new Error('Image enhancement timed out');
     }
 
+    // Step 4: Prepare response
     res.json({
       success: true,
-      removed_bg: `/uploads/${filename}`,
-      enhanced_url: outputUrl
+      originalSize: req.file.size,
+      removedBgUrl: `/uploads/${bgRemovedFilename}`,
+      enhancedUrl: enhancedImageUrl,
+      processingTime: `${attempts * 2} seconds`
     });
 
-  } catch (err) {
-    console.error('Processing error:', err);
+  } catch (error) {
+    console.error('Processing error:', error);
+    if (removedBgPath) cleanupFile(removedBgPath);
+    
     res.status(500).json({
-      error: 'Internal server error',
-      message: err.message,
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      success: false,
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
-// Serve uploads statically
-app.use('/uploads', express.static('uploads'));
+// Serve uploaded files
+app.use('/uploads', express.static(uploadsDir));
 
-// Health endpoint
+// Health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy' });
+  res.status(200).json({ 
+    status: 'healthy',
+    services: {
+      removeBg: REMOVE_BG_API_KEY ? 'configured' : 'missing',
+      replicate: REPLICATE_API_KEY ? 'configured' : 'missing'
+    }
+  });
 });
 
-// Root endpoint
+// Serve frontend
 app.get('/', (req, res) => {
-  res.send('Shopify Product Image Processor API is running');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Server error:', err);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: err.message
+  });
 });
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Upload directory: ${uploadsDir}`);
+  console.log(`CORS allowed origin: ${process.env.ALLOWED_ORIGIN || 'All origins (*)'}`);
 });
