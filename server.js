@@ -1,39 +1,61 @@
-
 const express = require('express');
 const multer = require('multer');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // node-fetch v2
 const FormData = require('form-data');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
 const PORT = process.env.PORT || 3000;
 
-// المفاتيح السرية - يفضل تخزينها في متغيرات بيئة
-const REMOVE_BG_API_KEY = "ZH5bA7XyURtKi2yc3bERV8f6";
-const REPLICATE_API_KEY = "r8_YVR3NBxC7lR6fSEGT18M926Aks8ccz011VRlu";
-const REAL_ESRGAN_MODEL = "cjwbw/real-esrgan";
+// Multer in-memory storage
+const upload = multer({ storage: multer.memoryStorage() });
 
-// إعدادات عامة
+// API keys (should be in environment variables in production)
+const REMOVE_BG_API_KEY = process.env.REMOVE_BG_API_KEY || "YOUR_REMOVE_BG_API_KEY";
+const REPLICATE_API_KEY = process.env.REPLICATE_API_KEY || "YOUR_REPLICATE_API_KEY";
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// نقطة استقبال الصورة
+// Ensure uploads folder exists
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
+
+// Check for API keys
+if (
+  !REMOVE_BG_API_KEY ||
+  REMOVE_BG_API_KEY === "YOUR_REMOVE_BG_API_KEY" ||
+  !REPLICATE_API_KEY ||
+  REPLICATE_API_KEY === "YOUR_REPLICATE_API_KEY"
+) {
+  console.error('ERROR: API keys are missing or not set.');
+  process.exit(1);
+}
+
+// Process endpoint
 app.post('/process', upload.single('image'), async (req, res) => {
   try {
-    const filePath = req.file.path;
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
 
-    // 1) إزالة الخلفية
+    // 1) Remove background
     const formData = new FormData();
-    formData.append('image_file', fs.createReadStream(filePath));
+    formData.append('image_file', req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype
+    });
     formData.append('size', 'auto');
 
     const removeRes = await fetch('https://api.remove.bg/v1.0/removebg', {
       method: 'POST',
       headers: {
-        'X-Api-Key': REMOVE_BG_API_KEY
+        'X-Api-Key': REMOVE_BG_API_KEY,
+        ...formData.getHeaders()
       },
       body: formData
     });
@@ -44,10 +66,11 @@ app.post('/process', upload.single('image'), async (req, res) => {
     }
 
     const buffer = await removeRes.buffer();
-    const removedBgPath = path.join('uploads', `removed_${req.file.filename}.png`);
+    const filename = `removed_${Date.now()}.png`;
+    const removedBgPath = path.join('uploads', filename);
     fs.writeFileSync(removedBgPath, buffer);
 
-    // 2) تحسين الجودة باستخدام Replicate
+    // 2) Enhance with Replicate
     const replicateRes = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
@@ -64,34 +87,76 @@ app.post('/process', upload.single('image'), async (req, res) => {
       })
     });
 
+    if (!replicateRes.ok) {
+      const error = await replicateRes.json();
+      return res.status(400).json({ error: 'Replicate API failed', details: error });
+    }
+
     const replicateJson = await replicateRes.json();
 
     if (!replicateJson.urls || !replicateJson.urls.get) {
-      return res.status(400).json({ error: 'Replicate API failed', details: replicateJson });
+      return res.status(400).json({ error: 'Replicate API response missing URLs' });
     }
 
-    // 3) جلب الرابط النهائي من Replicate
-    const finalRes = await fetch(replicateJson.urls.get, {
-      headers: {
-        'Authorization': `Bearer ${REPLICATE_API_KEY}`
-      }
-    });
+    // 3) Poll for completion
+    let outputUrl;
+    let attempts = 0;
+    const maxAttempts = 30; // ~60 seconds
 
-    const finalJson = await finalRes.json();
-    const outputUrl = finalJson.output;
+    while (attempts < maxAttempts) {
+      const finalRes = await fetch(replicateJson.urls.get, {
+        headers: {
+          'Authorization': `Bearer ${REPLICATE_API_KEY}`
+        }
+      });
+
+      const finalJson = await finalRes.json();
+
+      if (finalJson.status === 'succeeded') {
+        outputUrl = finalJson.output;
+        break;
+      } else if (finalJson.status === 'failed') {
+        return res.status(400).json({ error: 'Image enhancement failed', details: finalJson });
+      }
+
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    if (!outputUrl) {
+      return res.status(408).json({ error: 'Image enhancement timed out' });
+    }
 
     res.json({
       success: true,
-      removed_bg_local: `/uploads/removed_${req.file.filename}.png`,
+      removed_bg: `/uploads/${filename}`,
       enhanced_url: outputUrl
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal server error', details: err.message });
+    console.error('Processing error:', err);
+    res.status(500).json({
+      error: 'Internal server error',
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 });
 
+// Serve uploads statically
+app.use('/uploads', express.static('uploads'));
+
+// Health endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy' });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.send('Shopify Product Image Processor API is running');
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
