@@ -1,0 +1,511 @@
+Html
+Ahmad Shaheen<info@wizardch.com>
+​
+You
+​
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معالج صور منتجات Shopify</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#8B5CF6',
+                        success: '#10b981',
+                        error: '#EF4444',
+                        dark: '#1F2937',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+        .step {
+            transition: all 0.3s ease;
+        }
+        .image-container {
+            transition: transform 0.3s ease;
+        }
+        .image-container:hover {
+            transform: scale(1.03);
+        }
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #5D5CDE;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen text-gray-800 dark:text-gray-200">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <div class="flex justify-center mb-4">
+                <div class="bg-gradient-to-r from-primary to-secondary w-16 h-16 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-camera-retro text-white text-2xl"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">معالج صور منتجات Shopify</h1>
+            <p class="mt-3 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                قم بتحسين صور منتجاتك عبر إزالة الخلفية، تحسين الجودة، وتغيير الحجم لتتناسب مع متجر Shopify
+            </p>
+        </header>
+
+        <!-- Stepper -->
+        <div class="flex justify-between relative mb-12 mx-4">
+            <div class="absolute top-4 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 -z-10"></div>
+            <div class="step flex flex-col items-center">
+                <div id="step1" class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-white">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <span class="mt-2 text-sm font-medium">تحميل الصورة</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div id="step2" class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">
+                    <i class="fas fa-broom"></i>
+                </div>
+                <span class="mt-2 text-sm font-medium text-gray-500">إزالة الخلفية</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div id="step3" class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">
+                    <i class="fas fa-magic"></i>
+                </div>
+                <span class="mt-2 text-sm font-medium text-gray-500">تحسين الجودة</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div id="step4" class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">
+                    <i class="fas fa-crop-alt"></i>
+                </div>
+                <span class="mt-2 text-sm font-medium text-gray-500">تغيير الحجم</span>
+            </div>
+            <div class="step flex flex-col items-center">
+                <div id="step5" class="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-500">
+                    <i class="fas fa-download"></i>
+                </div>
+                <span class="mt-2 text-sm font-medium text-gray-500">التحميل</span>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/2">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">تحميل الصورة</h2>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        قم بتحميل صورة المنتج التي ترغب في معالجتها. نوصي باستخدام صور عالية الجودة لنتائج أفضل.
+                    </p>
+                    
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                         id="dropZone">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
+                        <p class="font-medium text-gray-700 dark:text-gray-300">اسحب وأسقط الصورة هنا</p>
+                        <p class="text-gray-500 text-sm mt-1">أو انقر لاختيار ملف</p>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden">
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-medium mb-2 text-gray-700 dark:text-gray-300">إعدادات الحجم</h3>
+                        <div class="flex items-center mb-3">
+                            <input id="size1024" type="radio" name="size" value="1024" class="w-4 h-4 text-primary focus:ring-primary" checked>
+                            <label for="size1024" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                1024×1024 (مستحسن)
+                            </label>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <input id="size2048" type="radio" name="size" value="2048" class="w-4 h-4 text-primary focus:ring-primary">
+                            <label for="size2048" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                2048×2048 (جودة عالية)
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="size512" type="radio" name="size" value="512" class="w-4 h-4 text-primary focus:ring-primary">
+                            <label for="size512" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                512×512 (تحميل سريع)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">معاينة الصورة</h2>
+                    <div class="flex flex-col items-center justify-center h-full">
+                        <div id="previewContainer" class="bg-gray-100 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg w-full h-64 flex items-center justify-center">
+                            <p class="text-gray-500 text-center px-4">سيظهر معاينة للصورة هنا بعد التحميل</p>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
+                            <p>الحد الأقصى لحجم الملف: 5MB</p>
+                            <p>الصيغ المدعومة: JPG, PNG, WEBP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button id="processBtn" class="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 px-4 rounded-lg font-medium text-lg mb-8 hover:opacity-90 transition-opacity flex items-center justify-center">
+            بدء المعالجة
+        </button>
+
+        <div id="status" class="text-center mb-8 py-4 bg-white dark:bg-gray-800 rounded-xl shadow">
+            <div class="flex flex-col items-center">
+                <div class="text-gray-600 dark:text-gray-300 mb-2">في انتظار تحميل الصورة...</div>
+                <div class="text-sm text-gray-500">المرحلة: <span id="currentStep">لم تبدأ بعد</span></div>
+            </div>
+        </div>
+
+        <div id="error" class="text-center text-error py-3 px-4 bg-red-50 dark:bg-red-900/30 rounded-lg mb-8 hidden"></div>
+
+        <div id="resultSection" class="hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">النتائج</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="image-container bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">الصورة الأصلية</h3>
+                        <div class="flex justify-center">
+                            <img id="originalImage" class="max-h-64 rounded object-contain" alt="الصورة الأصلية">
+                        </div>
+                    </div>
+                    <div class="image-container bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">الصورة المعالجة</h3>
+                        <div class="flex justify-center">
+                            <img id="processedImage" class="max-h-64 rounded object-contain" alt="الصورة المعالجة">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <h3 class="font-bold text-lg mb-3 text-gray-700 dark:text-gray-300">تحميل الصورة المعالجة</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">اختر الصيغة التي تفضلها لتحميل الصورة النهائية</p>
+                    
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <a id="downloadWebP" href="#" download class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center">
+                            <i class="fas fa-download mr-2"></i> WEBP
+                        </a>
+                        <a id="downloadPNG" href="#" download class="bg-secondary text-white px-6 py-3 rounded-lg font-medium hover:bg-secondary/90 transition-colors flex items-center">
+                            <i class="fas fa-download mr-2"></i> PNG
+                        </a>
+                        <a id="downloadJPG" href="#" download class="bg-success text-white px-6 py-3 rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center">
+                            <i class="fas fa-download mr-2"></i> JPG
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
+                <h3 class="text-xl font-bold mb-3">نصائح لصور منتجات أفضل</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li>استخدم خلفية بسيطة أو بيضاء لجعل المنتج يبرز</li>
+                    <li>التقط الصور بزاوية 45 درجة لإظهار تفاصيل المنتج</li>
+                    <li>تأكد من إضاءة جيدة للصورة لتجنب الظلال</li>
+                    <li>استخدم صور عالية الجودة (1MB على الأقل)</li>
+                    <li>أضف صوراً متعددة من زوايا مختلفة للمنتج</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 text-gray-600 dark:text-gray-400 text-sm">
+        <p>© 2023 معالج صور منتجات Shopify. جميع الحقوق محفوظة.</p>
+    </footer>
+
+    <script>
+        // العناصر الرئيسية
+        const fileInput = document.getElementById("fileInput");
+        const dropZone = document.getElementById("dropZone");
+        const previewContainer = document.getElementById("previewContainer");
+        const processBtn = document.getElementById("processBtn");
+        const status = document.getElementById("status");
+        const error = document.getElementById("error");
+        const resultSection = document.getElementById("resultSection");
+        const downloadWebP = document.getElementById("downloadWebP");
+        const downloadPNG = document.getElementById("downloadPNG");
+        const downloadJPG = document.getElementById("downloadJPG");
+        const originalImage = document.getElementById("originalImage");
+        const processedImage = document.getElementById("processedImage");
+        const currentStep = document.getElementById("currentStep");
+        
+        // عناصر الخطوات
+        const stepElements = {
+            step1: document.getElementById("step1"),
+            step2: document.getElementById("step2"),
+            step3: document.getElementById("step3"),
+            step4: document.getElementById("step4"),
+            step5: document.getElementById("step5")
+        };
+        
+        // ========== دوال معالجة الصور ==========
+        
+        /**
+         * إرسال الصورة للخادم للمعالجة
+         */
+        async function processImage(file, size) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('size', size);
+            
+            const response = await fetch('https://image-processor-zbfs.onrender.com/process', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'فشل في معالجة الصورة');
+            }
+            
+            return await response.json();
+        }
+        
+        /**
+         * تغيير حجم الصورة وتحويلها إلى صيغ مختلفة
+         */
+        async function resizeAndConvert(src, size) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = canvas.height = size;
+                    const ctx = canvas.getContext("2d");
+                    
+                    // حساب المقياس والموضع للحفاظ على التناسب
+                    const scale = Math.min(size / img.width, size / img.height);
+                    const x = (size - img.width * scale) / 2;
+                    const y = (size - img.height * scale) / 2;
+                    
+                    // مسح الخلفية ورسم الصورة
+                    ctx.clearRect(0, 0, size, size);
+                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                    
+                    // إنشاء نسخة WebP
+                    canvas.toBlob(blobWebp => {
+                        // إنشاء نسخة PNG
+                        canvas.toBlob(blobPng => {
+                            resolve({
+                                webp: URL.createObjectURL(blobWebp),
+                                png: URL.createObjectURL(blobPng)
+                            });
+                        }, "image/png");
+                    }, "image/webp", 0.85);
+                };
+                img.src = src;
+            });
+        }
+        
+        /**
+         * تحويل الصورة إلى صيغة JPG
+         */
+        async function convertToJpg(url) {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // تعبئة الخلفية باللون الأبيض
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // رسم الصورة
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // تحويل إلى JPG
+                    canvas.toBlob((blob) => {
+                        resolve(URL.createObjectURL(blob));
+                    }, 'image/jpeg', 0.9);
+                };
+                img.src = URL.createObjectURL(blob);
+            });
+        }
+        
+        // ========== دوال الواجهة ==========
+        
+        /**
+         * تحديث حالة الخطوة في الواجهة
+         */
+        function updateStep(step, status) {
+            const stepElement = stepElements[`step${step}`];
+            stepElement.className = `w-8 h-8 rounded-full flex items-center justify-center ${status} text-white`;
+            
+            // تحديث تسميات الخطوات
+            const stepLabels = document.querySelectorAll('.step span');
+            if (status === 'bg-primary') {
+                stepLabels[step-1].classList.add('text-gray-800', 'dark:text-white');
+                stepLabels[step-1].classList.remove('text-gray-500');
+            } else if (status === 'bg-success') {
+                stepLabels[step-1].classList.add('text-success');
+            }
+        }
+        
+        /**
+         * عرض رسالة خطأ
+         */
+        function showError(message) {
+            error.textContent = message;
+            error.classList.remove('hidden');
+            error.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // ========== معالجة الأحداث ==========
+        
+        // النقر على منطقة السحب والإفلات
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        // تغيير الملف المحدد
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const file = this.files[0];
+                
+                // التحقق من نوع الملف
+                const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showError('نوع الملف غير مدعوم. الرجاء تحميل صورة بصيغة JPG, PNG, أو WEBP.');
+                    return;
+                }
+                
+                // التحقق من حجم الملف
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('حجم الملف كبير جداً. الحد الأقصى 5MB.');
+                    return;
+                }
+                
+                // إخفاء أي أخطاء سابقة
+                error.classList.add('hidden');
+                
+                // عرض معاينة الصورة
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="max-h-60 rounded object-contain" alt="معاينة الصورة">`;
+                }
+                reader.readAsDataURL(file);
+                
+                // تحديث الحالة
+                currentStep.textContent = 'جاهز للمعالجة';
+                status.querySelector('div:first-child').textContent = 'تم تحميل الصورة بنجاح';
+            }
+        });
+        
+        // معالجة السحب والإفلات
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-gray-100', 'dark:bg-gray-700');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            }
+        });
+        
+        // معالجة الضغط على زر المعالجة
+        processBtn.addEventListener('click', async () => {
+            if (!fileInput.files[0]) {
+                showError('الرجاء تحميل صورة أولاً');
+                return;
+            }
+            
+            try {
+                // إعدادات الواجهة
+                error.classList.add('hidden');
+                resultSection.classList.add('hidden');
+                processBtn.innerHTML = '<div class="loader mr-2"></div> جاري المعالجة...';
+                processBtn.disabled = true;
+                
+                const selectedSize = parseInt(document.querySelector('input[name="size"]:checked').value);
+                const file = fileInput.files[0];
+                
+                // الخطوة 1: قراءة الصورة
+                currentStep.textContent = 'التحميل';
+                status.querySelector('div:first-child').textContent = 'جاري إرسال الصورة للخادم...';
+                updateStep(1, 'bg-primary');
+                
+                // الخطوة 2-4: معالجة الصورة على الخادم
+                currentStep.textContent = 'المعالجة على الخادم';
+                status.querySelector('div:first-child').textContent = 'جاري معالجة الصورة...';
+                updateStep(2, 'bg-primary');
+                updateStep(3, 'bg-primary');
+                updateStep(4, 'bg-primary');
+                
+                const result = await processImage(file, selectedSize);
+                
+                // تحميل الصورة المعالجة من الخادم
+                const enhancedResponse = await fetch(result.enhanced_url);
+                const enhancedBlob = await enhancedResponse.blob();
+                const enhancedUrl = URL.createObjectURL(enhancedBlob);
+                
+                // الخطوة 5: تغيير الحجم المحلي
+                currentStep.textContent = 'تجهيز النتائج';
+                status.querySelector('div:first-child').textContent = 'جاري تحضير الصور النهائية...';
+                const finalImages = await resizeAndConvert(enhancedUrl, selectedSize);
+                
+                // الخطوة 6: جاهز للتحميل
+                currentStep.textContent = 'جاهز للتحميل';
+                status.querySelector('div:first-child').textContent = 'تمت معالجة الصورة بنجاح!';
+                updateStep(2, 'bg-success');
+                updateStep(3, 'bg-success');
+                updateStep(4, 'bg-success');
+                updateStep(5, 'bg-primary');
+                
+                // عرض النتائج
+                originalImage.src = URL.createObjectURL(file);
+                processedImage.src = finalImages.webp;
+                
+                // إعداد روابط التحميل
+                downloadWebP.href = finalImages.webp;
+                downloadWebP.download = 'product.webp';
+                
+                downloadPNG.href = finalImages.png;
+                downloadPNG.download = 'product.png';
+                
+                downloadJPG.href = await convertToJpg(finalImages.png);
+                downloadJPG.download = 'product.jpg';
+                
+                // عرض قسم النتائج
+                resultSection.classList.remove('hidden');
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (err) {
+                showError('حدث خطأ أثناء معالجة الصورة: ' + err.message);
+                console.error(err);
+            } finally {
+                processBtn.innerHTML = 'بدء المعالجة';
+                processBtn.disabled = false;
+            }
+        });
+        
+        // إعداد الخطوة الأولية
+        updateStep(1, 'bg-primary');
+    </script>
+</body>
+</html>
