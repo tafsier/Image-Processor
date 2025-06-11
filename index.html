@@ -1,4 +1,3 @@
-نسخة تجريبه محسنه
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -100,7 +99,7 @@
                 </div>
             </div>
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-3">معالج صور منتجات Shopify</h1>
-            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p class="text-primary font-bold max-w-2xl mx-auto leading-relaxed">
                 قم بتحسين صور منتجاتك عبر إزالة الخلفية، تحسين الجودة، وتغيير الحجم لتتناسب مع متجر Shopify
             </p>
         </header>
@@ -243,7 +242,7 @@
         </div>
 
         <!-- Process Button -->
-        <button id="processBtn" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white py-3 px-4 rounded-lg font-medium text-lg mb-8 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        <button id="processBtn" class="w-full bg-primary hover:bg-secondary text-white py-3 px-4 rounded-lg font-bold text-lg mb-8 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
             بدء المعالجة
         </button>
 
@@ -306,13 +305,13 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-4">اختر الصيغة التي تفضلها لتحميل الصورة النهائية</p>
                     
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a id="downloadWebP" href="#" download class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
+                        <a id="downloadWebP" class="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> WEBP
                         </a>
-                        <a id="downloadPNG" href="#" download class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
+                        <a id="downloadPNG" class="bg-secondary hover:bg-primary text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> PNG
                         </a>
-                        <a id="downloadJPG" href="#" download class="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
+                        <a id="downloadJPG" class="bg-success hover:bg-primary text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> JPG
                         </a>
                     </div>
@@ -523,14 +522,16 @@
                     enhance: true,
                     resize: true
                 };
-                return;
+            } else {
+                selectedServices = {
+                    removeBg: false,
+                    enhance: false,
+                    resize: false
+                };
+                if (service === 'remove-bg') selectedServices.removeBg = true;
+                if (service === 'enhance') selectedServices.enhance = true;
+                if (service === 'resize') selectedServices.resize = true;
             }
-            
-            selectedServices = {
-                removeBg: service === 'remove-bg',
-                enhance: service === 'enhance',
-                resize: service === 'resize'
-            };
         }
         
         // ========== معالجة الأحداث ==========
@@ -543,11 +544,16 @@
             card.addEventListener('click', () => {
                 serviceCards.forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
-                
+        
                 const service = card.dataset.service;
                 updateSelectedServices(service);
-                
-                // تحديث واجهة الخطوات بناءً على الخدمات المختارة
+
+                // أظهر كل الخطوات أولاً
+                stepElements.step2.classList.remove('hidden');
+                stepElements.step3.classList.remove('hidden');
+                stepElements.step4.classList.remove('hidden');
+
+                // ثم أخفِ غير المطلوبة حسب الخدمة
                 if (service === 'remove-bg') {
                     stepElements.step3.classList.add('hidden');
                     stepElements.step4.classList.add('hidden');
@@ -557,10 +563,6 @@
                 } else if (service === 'resize') {
                     stepElements.step2.classList.add('hidden');
                     stepElements.step3.classList.add('hidden');
-                } else {
-                    stepElements.step2.classList.remove('hidden');
-                    stepElements.step3.classList.remove('hidden');
-                    stepElements.step4.classList.remove('hidden');
                 }
             });
         });
