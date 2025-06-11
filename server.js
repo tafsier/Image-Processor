@@ -35,9 +35,7 @@ if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
 
 // Middleware
 app.use(cors({
-  origin: (process.env.ALLOWED_ORIGIN && /^[\w\-\.:/]+$/.test(process.env.ALLOWED_ORIGIN))
-    ? process.env.ALLOWED_ORIGIN
-    : '*',
+  origin: process.env.ALLOWED_ORIGIN || '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
@@ -154,11 +152,11 @@ app.post('/process', upload.single('image'), async (req, res) => {
       throw new Error('Image enhancement timed out');
     }
 
-    // Step 4: Prepare response
+    // Step 4: Prepare response (always return full URLs)
     res.json({
       success: true,
       originalSize: req.file.size,
-      removedBgUrl: `/uploads/${bgRemovedFilename}`,
+      removedBgUrl: `${req.protocol}://${req.get('host')}/uploads/${bgRemovedFilename}`,
       enhancedUrl: enhancedImageUrl,
       processingTime: `${attempts * 2} seconds`
     });
