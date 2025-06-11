@@ -35,22 +35,20 @@ if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
 
 // Middleware
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN ,
+  origin: process.env.ALLOWED_ORIGIN || '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
 app.use(express.json());
-app.use(express.static(__dirname));
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
+
+// Serve uploaded files
+app.use('/uploads', express.static(uploadsDir));
 
 // Utility function to clean up temporary files
 const cleanupFile = (filePath) => {
@@ -66,7 +64,6 @@ const cleanupFile = (filePath) => {
 // Process image endpoint
 app.post('/process', upload.single('image'), async (req, res) => {
   let removedBgPath = null;
-  
   try {
     // Validate input
     if (!req.file) {
@@ -103,7 +100,6 @@ app.post('/process', upload.single('image'), async (req, res) => {
 
     // Step 2: Enhance image with Replicate
     const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${bgRemovedFilename}`;
-    
     const replicateResponse = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
@@ -126,7 +122,6 @@ app.post('/process', upload.single('image'), async (req, res) => {
     }
 
     const prediction = await replicateResponse.json();
-    
     if (!prediction?.urls?.get) {
       throw new Error('Invalid response from Replicate API');
     }
@@ -138,22 +133,18 @@ app.post('/process', upload.single('image'), async (req, res) => {
 
     while (attempts < maxAttempts && !enhancedImageUrl) {
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const statusResponse = await fetch(prediction.urls.get, {
         headers: {
           'Authorization': `Token ${REPLICATE_API_KEY}`
         }
       });
-
       const statusData = await statusResponse.json();
-      
       if (statusData.status === 'succeeded') {
         enhancedImageUrl = statusData.output;
         break;
       } else if (statusData.status === 'failed') {
         throw new Error('Image enhancement failed');
       }
-      
       attempts++;
     }
 
@@ -173,7 +164,6 @@ app.post('/process', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Processing error:', error);
     if (removedBgPath) cleanupFile(removedBgPath);
-    
     res.status(500).json({
       success: false,
       error: error.message,
@@ -181,9 +171,6 @@ app.post('/process', upload.single('image'), async (req, res) => {
     });
   }
 });
-
-// Serve uploaded files
-app.use('/uploads', express.static(uploadsDir));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -196,9 +183,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Serve frontend
+// Serve frontend (must be last route)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Error handling middleware
