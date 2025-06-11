@@ -3,16 +3,12 @@ const multer = require('multer');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 const cors = require('cors');
-app.use(cors({ origin: '*' }));
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const app = express(); // يجب أن يكون هنا أولاً
+app.use(cors({ origin: '*' })); // بعد تعريف app
 
 // Configure multer for file uploads
 const upload = multer({
@@ -194,4 +190,9 @@ app.use((err, req, res, next) => {
     error: 'Internal server error',
     message: err.message
   });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
 });
