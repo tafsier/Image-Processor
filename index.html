@@ -220,6 +220,45 @@
         <p>© 2023 معالج صور منتجات Shopify. جميع الحقوق محفوظة.</p>
     </footer>
 
+    <form id="uploadForm">
+      <input type="file" name="image" accept="image/*" required>
+      <button type="submit">رفع ومعالجة</button>
+    </form>
+    <div id="status" style="margin:1rem 0;color:#5D5CDE"></div>
+    <div id="result"></div>
+
+    <script>
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      document.getElementById('status').textContent = 'جاري المعالجة...';
+      document.getElementById('result').innerHTML = '';
+      try {
+        const res = await fetch('/process', { method: 'POST', body: formData });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('status').textContent = 'تمت المعالجة!';
+          document.getElementById('result').innerHTML = `
+            <div>
+              <h4>الصورة بدون خلفية:</h4>
+              <img src="${data.removedBgUrl}" style="max-width:300px;">
+              <a href="${data.removedBgUrl}" download="removed.png">تحميل PNG</a>
+            </div>
+            <div>
+              <h4>الصورة المحسنة:</h4>
+              <img src="${data.enhancedUrl}" style="max-width:300px;">
+              <a href="${data.enhancedUrl}" target="_blank">فتح الصورة المحسنة</a>
+            </div>
+          `;
+        } else {
+          document.getElementById('status').textContent = 'حدث خطأ: ' + (data.error || 'لم يتم المعالجة');
+        }
+      } catch (err) {
+        document.getElementById('status').textContent = 'حدث خطأ في الاتصال بالسيرفر';
+      }
+    };
+    </script>
+
     <script>
         // العناصر الرئيسية
         const fileInput = document.getElementById("fileInput");

@@ -35,7 +35,7 @@ if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
 
 // Middleware
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || '*',
+  origin: '*',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
