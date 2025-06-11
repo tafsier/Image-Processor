@@ -4,28 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معالج صور منتجات Shopify</title>
+    <link rel="icon" href="data:,">
+    <!-- استخدم CDN للـ CSS الجاهز من Tailwind -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5D5CDE',
-                        secondary: '#8B5CF6',
-                        success: '#10b981',
-                        error: '#EF4444',
-                        dark: '#1F2937',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-        body {
-            font-family: 'Tajawal', sans-serif;
-        }
+        body { font-family: 'Tajawal', sans-serif; }
         .step {
             transition: all 0.3s ease;
         }
@@ -220,45 +205,6 @@
         <p>© 2023 معالج صور منتجات Shopify. جميع الحقوق محفوظة.</p>
     </footer>
 
-    <form id="uploadForm">
-      <input type="file" name="image" accept="image/*" required>
-      <button type="submit">رفع ومعالجة</button>
-    </form>
-    <div id="status" style="margin:1rem 0;color:#5D5CDE"></div>
-    <div id="result"></div>
-
-    <script>
-    document.getElementById('uploadForm').onsubmit = async function(e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      document.getElementById('status').textContent = 'جاري المعالجة...';
-      document.getElementById('result').innerHTML = '';
-      try {
-        const res = await fetch('/process', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById('status').textContent = 'تمت المعالجة!';
-          document.getElementById('result').innerHTML = `
-            <div>
-              <h4>الصورة بدون خلفية:</h4>
-              <img src="${data.removedBgUrl}" style="max-width:300px;">
-              <a href="${data.removedBgUrl}" download="removed.png">تحميل PNG</a>
-            </div>
-            <div>
-              <h4>الصورة المحسنة:</h4>
-              <img src="${data.enhancedUrl}" style="max-width:300px;">
-              <a href="${data.enhancedUrl}" target="_blank">فتح الصورة المحسنة</a>
-            </div>
-          `;
-        } else {
-          document.getElementById('status').textContent = 'حدث خطأ: ' + (data.error || 'لم يتم المعالجة');
-        }
-      } catch (err) {
-        document.getElementById('status').textContent = 'حدث خطأ في الاتصال بالسيرفر';
-      }
-    };
-    </script>
-
     <script>
         // العناصر الرئيسية
         const fileInput = document.getElementById("fileInput");
@@ -284,6 +230,9 @@
             step5: document.getElementById("step5")
         };
         
+        // عنوان الخادم
+        const SERVER_URL = 'https://image-processor-zbfs.onrender.com';
+        
         // ========== دوال معالجة الصور ==========
         
         /**
@@ -293,17 +242,17 @@
             const formData = new FormData();
             formData.append('image', file);
             formData.append('size', size);
-            
-            const response = await fetch('https://image-processor-zbfs.onrender.com/process', {
+
+            const response = await fetch(SERVER_URL + '/process', {
                 method: 'POST',
                 body: formData
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'فشل في معالجة الصورة');
             }
-            
+
             return await response.json();
         }
         
@@ -492,8 +441,8 @@
                 
                 const result = await processImage(file, selectedSize);
                 
-                // تحميل الصورة المعالجة من الخادم
-                const enhancedResponse = await fetch(result.enhanced_url);
+                // تحميل الصورة المحسنة من السيرفر (دائمًا استخدم SERVER_URL)
+                const enhancedResponse = await fetch(result.enhancedUrl.startsWith('http') ? result.enhancedUrl : SERVER_URL + result.enhancedUrl);
                 const enhancedBlob = await enhancedResponse.blob();
                 const enhancedUrl = URL.createObjectURL(enhancedBlob);
                 
@@ -515,14 +464,18 @@
                 processedImage.src = finalImages.webp;
                 
                 // إعداد روابط التحميل
-                downloadWebP.href = finalImages.webp;
-                downloadWebP.download = 'product.webp';
-                
-                downloadPNG.href = finalImages.png;
-                downloadPNG.download = 'product.png';
-                
-                downloadJPG.href = await convertToJpg(finalImages.png);
-                downloadJPG.download = 'product.jpg';
+                if (finalImages.webp) {
+                    downloadWebP.href = finalImages.webp;
+                    downloadWebP.download = 'product.webp';
+                }
+                if (finalImages.png) {
+                    downloadPNG.href = finalImages.png;
+                    downloadPNG.download = 'product.png';
+                }
+                if (finalImages.png) {
+                    downloadJPG.href = await convertToJpg(finalImages.png);
+                    downloadJPG.download = 'product.jpg';
+                }
                 
                 // عرض قسم النتائج
                 resultSection.classList.remove('hidden');
