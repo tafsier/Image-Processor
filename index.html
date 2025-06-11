@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,54 +6,136 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>معالج صور منتجات Shopify</title>
     <link rel="icon" href="data:,">
-    <!-- استخدم CDN للـ CSS الجاهز من Tailwind -->
+    <!-- أصول CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
-        body { font-family: 'Tajawal', sans-serif; }
+        
+        :root {
+            --primary: #5D5CDE;
+            --secondary: #8B5CF6;
+            --success: #10b981;
+            --error: #EF4444;
+            --dark: #1F2937;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
         .step {
             transition: all 0.3s ease;
         }
+        
         .image-container {
             transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
+        
         .image-container:hover {
             transform: scale(1.03);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
+        
         .loader {
             width: 48px;
             height: 48px;
-            border: 5px solid #5D5CDE;
+            border: 5px solid var(--primary);
             border-bottom-color: transparent;
             border-radius: 50%;
             animation: rotation 1s linear infinite;
         }
+        
         @keyframes rotation {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        .service-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .service-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(93, 92, 222, 0.05);
+        }
+        
+        .dark .service-card.selected {
+            background-color: rgba(93, 92, 222, 0.2);
         }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen text-gray-800 dark:text-gray-200">
     <div class="max-w-4xl mx-auto px-4 py-8">
-        <header class="text-center mb-12">
+        <!-- Header Section -->
+        <header class="text-center mb-12 animate-fade-in">
             <div class="flex justify-center mb-4">
-                <div class="bg-gradient-to-r from-primary to-secondary w-16 h-16 rounded-lg flex items-center justify-center">
+                <div class="bg-gradient-to-r from-primary to-secondary w-16 h-16 rounded-lg flex items-center justify-center shadow-lg">
                     <i class="fas fa-camera-retro text-white text-2xl"></i>
                 </div>
             </div>
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">معالج صور منتجات Shopify</h1>
-            <p class="mt-3 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-3">معالج صور منتجات Shopify</h1>
+            <p class="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                 قم بتحسين صور منتجاتك عبر إزالة الخلفية، تحسين الجودة، وتغيير الحجم لتتناسب مع متجر Shopify
             </p>
         </header>
+
+        <!-- Services Selection -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">اختر الخدمات المطلوبة</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="service-card p-4 rounded-lg cursor-pointer bg-white dark:bg-gray-700" data-service="remove-bg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-3">
+                            <i class="fas fa-broom text-purple-600 dark:text-purple-300"></i>
+                        </div>
+                        <span class="font-medium">إزالة الخلفية</span>
+                    </div>
+                </div>
+                
+                <div class="service-card p-4 rounded-lg cursor-pointer bg-white dark:bg-gray-700" data-service="enhance">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3">
+                            <i class="fas fa-magic text-blue-600 dark:text-blue-300"></i>
+                        </div>
+                        <span class="font-medium">تحسين الجودة</span>
+                    </div>
+                </div>
+                
+                <div class="service-card p-4 rounded-lg cursor-pointer bg-white dark:bg-gray-700" data-service="resize">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3">
+                            <i class="fas fa-crop-alt text-green-600 dark:text-green-300"></i>
+                        </div>
+                        <span class="font-medium">تغيير الحجم</span>
+                    </div>
+                </div>
+                
+                <div class="service-card p-4 rounded-lg cursor-pointer bg-white dark:bg-gray-700 selected" data-service="all">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center mr-3">
+                            <i class="fas fa-star text-white"></i>
+                        </div>
+                        <span class="font-medium">الكل (حزمة كاملة)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Stepper -->
         <div class="flex justify-between relative mb-12 mx-4">
             <div class="absolute top-4 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 -z-10"></div>
             <div class="step flex flex-col items-center">
-                <div id="step1" class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-white">
+                <div id="step1" class="w-8 h-8 rounded-full flex items-center justify-center bg-primary text-white shadow-md">
                     <i class="fas fa-cloud-upload-alt"></i>
                 </div>
                 <span class="mt-2 text-sm font-medium">تحميل الصورة</span>
@@ -84,15 +167,15 @@
         </div>
 
         <!-- Upload Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300">
             <div class="flex flex-col md:flex-row gap-8">
                 <div class="md:w-1/2">
                     <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">تحميل الصورة</h2>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                    <p class="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
                         قم بتحميل صورة المنتج التي ترغب في معالجتها. نوصي باستخدام صور عالية الجودة لنتائج أفضل.
                     </p>
                     
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center mb-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-300"
                          id="dropZone">
                         <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
                         <p class="font-medium text-gray-700 dark:text-gray-300">اسحب وأسقط الصورة هنا</p>
@@ -100,25 +183,27 @@
                         <input type="file" id="fileInput" accept="image/*" class="hidden">
                     </div>
                     
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 transition-all duration-300">
                         <h3 class="font-medium mb-2 text-gray-700 dark:text-gray-300">إعدادات الحجم</h3>
-                        <div class="flex items-center mb-3">
-                            <input id="size1024" type="radio" name="size" value="1024" class="w-4 h-4 text-primary focus:ring-primary" checked>
-                            <label for="size1024" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                1024×1024 (مستحسن)
-                            </label>
-                        </div>
-                        <div class="flex items-center mb-3">
-                            <input id="size2048" type="radio" name="size" value="2048" class="w-4 h-4 text-primary focus:ring-primary">
-                            <label for="size2048" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                2048×2048 (جودة عالية)
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input id="size512" type="radio" name="size" value="512" class="w-4 h-4 text-primary focus:ring-primary">
-                            <label for="size512" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                                512×512 (تحميل سريع)
-                            </label>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input id="size512" type="radio" name="size" value="512" class="w-4 h-4 text-primary focus:ring-primary">
+                                <label for="size512" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    512×512 (تحميل سريع)
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="size1024" type="radio" name="size" value="1024" class="w-4 h-4 text-primary focus:ring-primary" checked>
+                                <label for="size1024" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    1024×1024 (مستحسن)
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="size2048" type="radio" name="size" value="2048" class="w-4 h-4 text-primary focus:ring-primary">
+                                <label for="size2048" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    2048×2048 (جودة عالية)
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -126,83 +211,132 @@
                 <div class="md:w-1/2">
                     <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">معاينة الصورة</h2>
                     <div class="flex flex-col items-center justify-center h-full">
-                        <div id="previewContainer" class="bg-gray-100 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg w-full h-64 flex items-center justify-center">
-                            <p class="text-gray-500 text-center px-4">سيظهر معاينة للصورة هنا بعد التحميل</p>
+                        <div id="previewContainer" class="bg-gray-100 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg w-full h-64 flex items-center justify-center transition-all duration-300">
+                            <div class="text-center px-4">
+                                <i class="fas fa-image text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500">سيظهر معاينة للصورة هنا بعد التحميل</p>
+                            </div>
                         </div>
-                        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
-                            <p>الحد الأقصى لحجم الملف: 5MB</p>
-                            <p>الصيغ المدعومة: JPG, PNG, WEBP</p>
+                        <div class="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center space-y-1">
+                            <p class="flex items-center justify-center"><i class="fas fa-info-circle mr-1"></i> الحد الأقصى لحجم الملف: 5MB</p>
+                            <p class="flex items-center justify-center"><i class="fas fa-file-image mr-1"></i> الصيغ المدعومة: JPG, PNG, WEBP</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <button id="processBtn" class="w-full bg-gradient-to-r from-primary to-secondary text-white py-3 px-4 rounded-lg font-medium text-lg mb-8 hover:opacity-90 transition-opacity flex items-center justify-center">
+        <!-- Process Button -->
+        <button id="processBtn" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white py-3 px-4 rounded-lg font-medium text-lg mb-8 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             بدء المعالجة
         </button>
 
-        <div id="status" class="text-center mb-8 py-4 bg-white dark:bg-gray-800 rounded-xl shadow">
+        <!-- Status Section -->
+        <div id="status" class="text-center mb-8 py-4 bg-white dark:bg-gray-800 rounded-xl shadow transition-all duration-300">
             <div class="flex flex-col items-center">
-                <div class="text-gray-600 dark:text-gray-300 mb-2">في انتظار تحميل الصورة...</div>
-                <div class="text-sm text-gray-500">المرحلة: <span id="currentStep">لم تبدأ بعد</span></div>
+                <div class="text-gray-600 dark:text-gray-300 mb-2 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span id="statusMessage">في انتظار تحميل الصورة...</span>
+                </div>
+                <div class="text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-tasks mr-1"></i>
+                    <span>المرحلة: <span id="currentStep">لم تبدأ بعد</span></span>
+                </div>
             </div>
         </div>
 
-        <div id="error" class="text-center text-error py-3 px-4 bg-red-50 dark:bg-red-900/30 rounded-lg mb-8 hidden"></div>
+        <!-- Error Section -->
+        <div id="error" class="text-center text-error py-3 px-4 bg-red-50 dark:bg-red-900/30 rounded-lg mb-8 hidden transition-all duration-300">
+            <div class="flex items-center justify-center">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+        </div>
 
-        <div id="resultSection" class="hidden">
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">النتائج</h2>
+        <!-- Results Section -->
+        <div id="resultSection" class="hidden animate-fade-in">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+                    <i class="fas fa-check-circle text-success mr-2"></i>
+                    النتائج
+                </h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div class="image-container bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">الصورة الأصلية</h3>
+                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-image mr-2"></i>
+                            الصورة الأصلية
+                        </h3>
                         <div class="flex justify-center">
-                            <img id="originalImage" class="max-h-64 rounded object-contain" alt="الصورة الأصلية">
+                            <img id="originalImage" class="max-h-64 rounded object-contain shadow" alt="الصورة الأصلية">
                         </div>
                     </div>
                     <div class="image-container bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">الصورة المعالجة</h3>
+                        <h3 class="font-bold text-lg mb-3 text-center text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-magic mr-2"></i>
+                            الصورة المعالجة
+                        </h3>
                         <div class="flex justify-center">
-                            <img id="processedImage" class="max-h-64 rounded object-contain" alt="الصورة المعالجة">
+                            <img id="processedImage" class="max-h-64 rounded object-contain shadow" alt="الصورة المعالجة">
                         </div>
                     </div>
                 </div>
                 
                 <div class="text-center mb-6">
-                    <h3 class="font-bold text-lg mb-3 text-gray-700 dark:text-gray-300">تحميل الصورة المعالجة</h3>
+                    <h3 class="font-bold text-lg mb-3 text-gray-700 dark:text-gray-300">
+                        <i class="fas fa-download mr-2"></i>
+                        تحميل الصورة المعالجة
+                    </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4">اختر الصيغة التي تفضلها لتحميل الصورة النهائية</p>
                     
                     <div class="flex flex-wrap justify-center gap-4">
-                        <a id="downloadWebP" href="#" download class="bg-primary text-white px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center">
+                        <a id="downloadWebP" href="#" download class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> WEBP
                         </a>
-                        <a id="downloadPNG" href="#" download class="bg-secondary text-white px-6 py-3 rounded-lg font-medium hover:bg-secondary/90 transition-colors flex items-center">
+                        <a id="downloadPNG" href="#" download class="bg-secondary hover:bg-secondary/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> PNG
                         </a>
-                        <a id="downloadJPG" href="#" download class="bg-success text-white px-6 py-3 rounded-lg font-medium hover:bg-success/90 transition-colors flex items-center">
+                        <a id="downloadJPG" href="#" download class="bg-success hover:bg-success/90 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-300 flex items-center shadow hover:shadow-md">
                             <i class="fas fa-download mr-2"></i> JPG
                         </a>
                     </div>
                 </div>
             </div>
             
-            <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white">
-                <h3 class="text-xl font-bold mb-3">نصائح لصور منتجات أفضل</h3>
+            <div class="bg-gradient-to-r from-primary to-secondary rounded-xl p-6 text-white shadow-lg transition-all duration-300">
+                <h3 class="text-xl font-bold mb-3 flex items-center">
+                    <i class="fas fa-lightbulb mr-2"></i>
+                    نصائح لصور منتجات أفضل
+                </h3>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>استخدم خلفية بسيطة أو بيضاء لجعل المنتج يبرز</li>
-                    <li>التقط الصور بزاوية 45 درجة لإظهار تفاصيل المنتج</li>
-                    <li>تأكد من إضاءة جيدة للصورة لتجنب الظلال</li>
-                    <li>استخدم صور عالية الجودة (1MB على الأقل)</li>
-                    <li>أضف صوراً متعددة من زوايا مختلفة للمنتج</li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle mt-1 mr-2 text-white/80"></i>
+                        <span>استخدم خلفية بسيطة أو بيضاء لجعل المنتج يبرز</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle mt-1 mr-2 text-white/80"></i>
+                        <span>التقط الصور بزاوية 45 درجة لإظهار تفاصيل المنتج</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle mt-1 mr-2 text-white/80"></i>
+                        <span>تأكد من إضاءة جيدة للصورة لتجنب الظلال</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle mt-1 mr-2 text-white/80"></i>
+                        <span>استخدم صور عالية الجودة (1MB على الأقل)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle mt-1 mr-2 text-white/80"></i>
+                        <span>أضف صوراً متعددة من زوايا مختلفة للمنتج</span>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
 
-    <footer class="text-center py-6 text-gray-600 dark:text-gray-400 text-sm">
-        <p>© 2023 معالج صور منتجات Shopify. جميع الحقوق محفوظة.</p>
+    <!-- Footer -->
+    <footer class="text-center py-6 text-gray-600 dark:text-gray-400 text-sm transition-all duration-300">
+        <p>© <span id="currentYear"></span> معالج صور منتجات Shopify. جميع الحقوق محفوظة.</p>
     </footer>
 
     <script>
@@ -220,6 +354,9 @@
         const originalImage = document.getElementById("originalImage");
         const processedImage = document.getElementById("processedImage");
         const currentStep = document.getElementById("currentStep");
+        const statusMessage = document.getElementById("statusMessage");
+        const errorMessage = document.getElementById("errorMessage");
+        const serviceCards = document.querySelectorAll('.service-card');
         
         // عناصر الخطوات
         const stepElements = {
@@ -233,6 +370,13 @@
         // عنوان الخادم
         const SERVER_URL = 'https://image-processor-zbfs.onrender.com';
         
+        // الخدمات المختارة
+        let selectedServices = {
+            removeBg: true,
+            enhance: true,
+            resize: true
+        };
+        
         // ========== دوال معالجة الصور ==========
         
         /**
@@ -242,6 +386,7 @@
             const formData = new FormData();
             formData.append('image', file);
             formData.append('size', size);
+            formData.append('services', JSON.stringify(selectedServices));
 
             const response = await fetch(SERVER_URL + '/process', {
                 method: 'POST',
@@ -329,7 +474,7 @@
          */
         function updateStep(step, status) {
             const stepElement = stepElements[`step${step}`];
-            stepElement.className = `w-8 h-8 rounded-full flex items-center justify-center ${status} text-white`;
+            stepElement.className = `w-8 h-8 rounded-full flex items-center justify-center ${status} text-white shadow-md`;
             
             // تحديث تسميات الخطوات
             const stepLabels = document.querySelectorAll('.step span');
@@ -345,12 +490,64 @@
          * عرض رسالة خطأ
          */
         function showError(message) {
-            error.textContent = message;
+            errorMessage.textContent = message;
             error.classList.remove('hidden');
+            error.classList.add('animate-shake');
+            setTimeout(() => error.classList.remove('animate-shake'), 500);
             error.scrollIntoView({ behavior: 'smooth' });
         }
         
+        /**
+         * تحديث الخدمات المختارة
+         */
+        function updateSelectedServices(service) {
+            if (service === 'all') {
+                selectedServices = {
+                    removeBg: true,
+                    enhance: true,
+                    resize: true
+                };
+                return;
+            }
+            
+            selectedServices = {
+                removeBg: service === 'remove-bg',
+                enhance: service === 'enhance',
+                resize: service === 'resize'
+            };
+        }
+        
         // ========== معالجة الأحداث ==========
+        
+        // تحديث سنة حقوق النشر
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // اختيار الخدمات
+        serviceCards.forEach(card => {
+            card.addEventListener('click', () => {
+                serviceCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                
+                const service = card.dataset.service;
+                updateSelectedServices(service);
+                
+                // تحديث واجهة الخطوات بناءً على الخدمات المختارة
+                if (service === 'remove-bg') {
+                    stepElements.step3.classList.add('hidden');
+                    stepElements.step4.classList.add('hidden');
+                } else if (service === 'enhance') {
+                    stepElements.step2.classList.add('hidden');
+                    stepElements.step4.classList.add('hidden');
+                } else if (service === 'resize') {
+                    stepElements.step2.classList.add('hidden');
+                    stepElements.step3.classList.add('hidden');
+                } else {
+                    stepElements.step2.classList.remove('hidden');
+                    stepElements.step3.classList.remove('hidden');
+                    stepElements.step4.classList.remove('hidden');
+                }
+            });
+        });
         
         // النقر على منطقة السحب والإفلات
         dropZone.addEventListener('click', () => fileInput.click());
@@ -379,13 +576,20 @@
                 // عرض معاينة الصورة
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    previewContainer.innerHTML = `<img src="${e.target.result}" class="max-h-60 rounded object-contain" alt="معاينة الصورة">`;
+                    previewContainer.innerHTML = `
+                        <div class="relative w-full h-full">
+                            <img src="${e.target.result}" class="w-full h-full object-contain rounded" alt="معاينة الصورة">
+                            <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                                ${(file.size / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                        </div>
+                    `;
                 }
                 reader.readAsDataURL(file);
                 
                 // تحديث الحالة
                 currentStep.textContent = 'جاهز للمعالجة';
-                status.querySelector('div:first-child').textContent = 'تم تحميل الصورة بنجاح';
+                statusMessage.textContent = 'تم تحميل الصورة بنجاح';
             }
         });
         
@@ -429,34 +633,36 @@
                 
                 // الخطوة 1: قراءة الصورة
                 currentStep.textContent = 'التحميل';
-                status.querySelector('div:first-child').textContent = 'جاري إرسال الصورة للخادم...';
+                statusMessage.textContent = 'جاري إرسال الصورة للخادم...';
                 updateStep(1, 'bg-primary');
                 
                 // الخطوة 2-4: معالجة الصورة على الخادم
                 currentStep.textContent = 'المعالجة على الخادم';
-                status.querySelector('div:first-child').textContent = 'جاري معالجة الصورة...';
-                updateStep(2, 'bg-primary');
-                updateStep(3, 'bg-primary');
-                updateStep(4, 'bg-primary');
+                statusMessage.textContent = 'جاري معالجة الصورة...';
+                
+                if (selectedServices.removeBg) updateStep(2, 'bg-primary');
+                if (selectedServices.enhance) updateStep(3, 'bg-primary');
+                if (selectedServices.resize) updateStep(4, 'bg-primary');
                 
                 const result = await processImage(file, selectedSize);
                 
-                // تحميل الصورة المحسنة من السيرفر (دائمًا استخدم SERVER_URL)
+                // تحميل الصورة المحسنة من السيرفر
                 const enhancedResponse = await fetch(result.enhancedUrl.startsWith('http') ? result.enhancedUrl : SERVER_URL + result.enhancedUrl);
                 const enhancedBlob = await enhancedResponse.blob();
                 const enhancedUrl = URL.createObjectURL(enhancedBlob);
                 
                 // الخطوة 5: تغيير الحجم المحلي
                 currentStep.textContent = 'تجهيز النتائج';
-                status.querySelector('div:first-child').textContent = 'جاري تحضير الصور النهائية...';
+                statusMessage.textContent = 'جاري تحضير الصور النهائية...';
                 const finalImages = await resizeAndConvert(enhancedUrl, selectedSize);
                 
                 // الخطوة 6: جاهز للتحميل
                 currentStep.textContent = 'جاهز للتحميل';
-                status.querySelector('div:first-child').textContent = 'تمت معالجة الصورة بنجاح!';
-                updateStep(2, 'bg-success');
-                updateStep(3, 'bg-success');
-                updateStep(4, 'bg-success');
+                statusMessage.textContent = 'تمت معالجة الصورة بنجاح!';
+                
+                if (selectedServices.removeBg) updateStep(2, 'bg-success');
+                if (selectedServices.enhance) updateStep(3, 'bg-success');
+                if (selectedServices.resize) updateStep(4, 'bg-success');
                 updateStep(5, 'bg-primary');
                 
                 // عرض النتائج
