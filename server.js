@@ -3,6 +3,7 @@ const multer = require('multer');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
 const cors = require('cors');
+app.use(cors({ origin: '*' }));
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -37,11 +38,6 @@ if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
 }
 
 // Middleware
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type']
-}));
 app.use(express.json());
 
 // Ensure uploads directory exists
