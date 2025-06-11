@@ -1,4 +1,3 @@
-
 const express = require('express');
 const multer = require('multer');
 const fetch = require('node-fetch');
@@ -36,7 +35,7 @@ if (!REMOVE_BG_API_KEY || !REPLICATE_API_KEY) {
 
 // Middleware
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || '*',
+  origin: process.env.ALLOWED_ORIGIN ,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
